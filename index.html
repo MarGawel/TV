@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moja Strona z Linkami</title>
+</head>
+<body>
+
+<div style="text-align: center;">
+    <h1>Moja Strona z Linkami</h1>
+
+    <div id="link-container">
+        <!-- Tu będą pojawiać się linki -->
+    </div>
+
+    <div>
+        <input type="text" id="link-input" placeholder="Wpisz URL linka...">
+        <button onclick="addLink()">Dodaj Link</button>
+    </div>
+
+    <script>
+        function addLink() {
+            const linkContainer = document.getElementById('link-container');
+            const linkInput = document.getElementById('link-input');
+            const url = linkInput.value;
+            
+            if (url) {
+                const linkElement = document.createElement('a');
+                linkElement.href = url;
+                linkElement.target = '_blank';
+                linkElement.textContent = url;
+                linkContainer.appendChild(linkElement);
+                linkContainer.appendChild(document.createElement('br')); // Dodaj nową linię
+            }
+
+            // Wyczyść pole wprowadzania po dodaniu linku
+            linkInput.value = '';
+        }
+    </script>
+
+</div>
+
+</body>
+</html>
