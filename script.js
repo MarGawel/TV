@@ -1,69 +1,71 @@
-const owner = 'TWOJA_NAZWA_UZYTKOWNIKA';
-const repo = 'NAZWA_REPOZYTORIUM';
-const filename = 'link.txt';
-const token = 'TWÓJ_PERSONALNY_ACCESS_TOKEN';
+// Funkcja do zapisywania linku w pliku link.txt na GitHubie
+function saveLink() {
+    const token = document.getElementById("tokenInput").value;
+    const link = document.getElementById("linkInput").value;
 
-// Funkcja do dodawania linku
-function addLink() {
-    const linkInput = document.getElementById('link-input');
-    const url = linkInput.value.trim();
-
-    if (url) {
-        // Pobieranie aktualnych linków
-        fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${filename}`, {
-            headers: {
-                'Authorization': `token ${token}`
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            const content = atob(data.content); // Dekodowanie z base64
-            const newContent = content + "\n" + url; // Dodawanie nowego linku
-
-            // Aktualizacja pliku
-            fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${filename}`, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `token ${token}`
-                },
-                body: JSON.stringify({
-                    message: 'Dodano nowy link',
-                    content: btoa(newContent), // Kodowanie do base64
-                    sha: data.sha
-                })
-            })
-            .then(() => {
-                // Aktualizacja wyświetlania linków na stronie
-                displayLinks();
-            });
-        });
+    if (!token || !link) {
+        alert("Please enter both the token and the link.");
+        return;
     }
 
-    // Wyczyść pole wprowadzania
-    linkInput.value = '';
-}
-
-// Funkcja do wyświetlania linków
-function displayLinks() {
-    fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${filename}`)
+    // Pobierz aktualną zawartość pliku link.txt
+    fetch('https://api.github.com/repos/YOUR_USERNAME/YOUR_REPO_NAME/contents/link.txt', {
+        headers: {
+            'Authorization': 'token ' + token
+        }
+    })
     .then(response => response.json())
     .then(data => {
-        const content = atob(data.content); // Dekodowanie z base64
-        const links = content.trim().split("\n");
-
-        const linkContainer = document.getElementById('link-container');
-        linkContainer.innerHTML = '';
-
-        links.forEach(link => {
-            const linkElement = document.createElement('a');
-            linkElement.href = link;
-            linkElement.target = '_blank';
-            linkElement.textContent = link;
-            linkContainer.appendChild(linkElement);
-            linkContainer.appendChild(document.createElement('br')); // Nowa linia
+        // Dodaj nowy link do zawartości pliku i zaktualizuj plik na GitHubie
+        const currentContent = atob(data.content);
+        const newContent = currentContent + "\n" + link;
+        
+        return fetch('https://api.github.com/repos/MArGawel/TV/contents/link.txt', {
+            method: 'PUT',
+            headers: {
+                'Authorization': 'token ' + token,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                message: 'Add new link',
+                content: btoa(newContent),
+                sha: data.sha
+            })
         });
+    })
+    .then(() => {
+        alert("Link saved successfully!");
+        document.getElementById("linkInput").value = ""; // Clear the link input field
+    })
+    .catch(error => {
+        console.error('There was an error saving the link:', error);
     });
 }
 
-// Wywołanie funkcji podczas ładowania strony
-window.onload = displayLinks;
+// Funkcja do wyświetlania linków z pliku link.txt podczas ładowania strony viewlinks.html
+document.addEventListener("DOMContentLoaded", function() {
+    if (window.location.pathname.endsWith("viewlinks.html")) {
+        fetch('https://api.github.com/repos/YOUR_USERNAME/YOUR_REPO_NAME/contents/link.txt')
+        .then(response => response.json())
+        .then(data => {
+            const content = atob(data.content);
+            const links = content.split('\n').filter(link => link.trim() !== ''); // Filter out any empty links
+            const linkList = document.getElementById('linkList');
+            linkList.innerHTML = '';
+
+            links.forEach(link => {
+                const linkElement = document.createElement('p');
+                linkElement.innerText = link;
+                linkList.appendChild(linkElement);
+            });
+        })
+        .catch(error => {
+            console.error('There was an error fetching the links:', error);
+        });
+    }
+});
+
+
+
+
+
